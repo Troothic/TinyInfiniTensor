@@ -10,8 +10,14 @@ ConcatObj::ConcatObj(GraphObj *graph, TensorVec inputs, Tensor output, int _dim)
 }
 
 optional<vector<Shape>> ConcatObj::inferShape(const TensorVec &inputs) {
+    int axis = getDim(); //获取axis
     Shape dims = inputs[0]->getDims();
-    auto rank = inputs[0]->getRank();
+    
+
+    for(size_t i = 1; i < inputs.size(); i++){
+        auto item_shape = inputs[i]->getDims(); //获取第i个输入的shape
+        dims[axis] += item_shape[axis]; //累加axis
+    }
 
     // =================================== 作业 ===================================
     // TODO：修改 dims，返回正确的 concat 后的 shape

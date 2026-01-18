@@ -31,8 +31,8 @@ namespace infini
         EXPECT_EQ(g->getTensors().size(), 3);
         EXPECT_EQ(g->getOperators()[0]->getOpType().underlying(), 7);
         auto op = as<MatmulObj>(g->getOperators()[0]);
-        EXPECT_EQ(op->getInputs(0)->getGuid(), 2);
-        EXPECT_EQ(op->getInputs(1)->getGuid(), 3);
+        EXPECT_EQ(op->getInputs(0)->getGuid(), 1);  // A 输入应该是 i1 (Guid 1)
+        EXPECT_EQ(op->getInputs(1)->getGuid(), 2);  // B 输入应该是 i2 (Guid 2)
         EXPECT_EQ(op->getOutputs()[0], o);
         EXPECT_EQ(op->getTransA(), false);
         EXPECT_EQ(op->getTransB(), true);

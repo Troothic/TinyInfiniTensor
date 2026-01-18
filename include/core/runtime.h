@@ -5,11 +5,11 @@
 
 namespace infini
 {
-  class TensorObj;
-  class OperatorObj;
-  class GraphObj;
-  class RuntimeObj;
-  class BlobObj;
+  class TensorObj; //张量类
+  class OperatorObj; //算子类
+  class GraphObj; //计算图类
+  class RuntimeObj; //运行时类
+  class BlobObj; //数据块类
 
   using Tensor = Ref<TensorObj>;
   using Operator = Ref<OperatorObj>;

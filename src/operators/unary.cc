@@ -39,7 +39,10 @@ namespace infini
         // TODO：返回经过 clip 操作后的 shape
         // REF: https://onnx.ai/onnx/operators/onnx__Clip.html#clip-13
         // =================================== 作业 ===================================
-        return std::nullopt;
+        // inputs 包含 1~3 个张量，但只有 inputs[0] 是主要的数据张量
+        // min 和 max 是标量，不影响形状
+        const auto A = inputs[0];
+        return {{A->getDims()}};
     }
 
     std::string ClipObj::toString() const
@@ -65,8 +68,8 @@ namespace infini
         // TODO：返回经过 cast 操作后, 输出 tensor 的数目和数据类型
         // REF_FILE: src/core/operator.cc
         // REF: https://onnx.ai/onnx/operators/onnx__Cast.html#cast-21
-        // =================================== 作业 ===================================
-        return {};
+        // =================================== 作业 ===================================        
+        return {getOutputDataType()};
     }
 
     optional<vector<Shape>> CastObj::inferShape(const TensorVec &inputs)
@@ -75,7 +78,8 @@ namespace infini
         // TODO：返回经过 cast 操作后的 shape
         // REF: https://onnx.ai/onnx/operators/onnx__Cast.html#cast-21
         // =================================== 作业 ===================================
-        return std::nullopt;
+        const auto A = inputs[0];
+        return {{A->getDims()}};
     }
 
     std::string CastObj::toString() const

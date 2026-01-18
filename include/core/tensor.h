@@ -12,21 +12,22 @@ namespace infini
     class GraphObj;
     using ShapeElem = int;
     using Shape = vector<ShapeElem>;
+    //张量类
     class TensorObj : public Object
     {
         friend class GraphObj;
 
     protected:
-        int dim;
+        int dim; //维度
 
-        DataType dtype;
-        vector<WRef<OperatorObj>> targets;
-        WRef<OperatorObj> source;
-        Blob data;
-        Runtime runtime;
+        DataType dtype; //数据类型
+        vector<WRef<OperatorObj>> targets; // 使用这个 tensor 的算子列表（弱引用）
+        WRef<OperatorObj> source; // 产生这个 tensor 的算子（弱引用）
+        Blob data; //实际数据存储（指向内存块）
+        Runtime runtime; //元素总数 = 1×2×2×3 = 12
 
     private:
-        Shape shape;
+        Shape shape;    // 形状，如 {1, 2, 2, 3}
         size_t _size; // Cache of Π(shape).
         Fuid fuid;    // Cloned tensors share the same id. Tensors constructed from
                       // scratch have a new id.
@@ -36,13 +37,13 @@ namespace infini
         virtual ~TensorObj() {}
         string toString() const override;
 
-        size_t size() const { return _size; }
-        size_t getBytes() const { return _size * dtype.getSize(); }
+        size_t size() const { return _size; }   //元素总数
+        size_t getBytes() const { return _size * dtype.getSize(); } //占用字节数
 
-        Shape getDims() const { return shape; }
-        void setShape(Shape shape_);
-        size_t getRank() const { return shape.size(); }
-        UidBaseType getFuid() const { return fuid; }
+        Shape getDims() const { return shape; } //获取形状
+        void setShape(Shape shape_); //设置形状
+        size_t getRank() const { return shape.size(); } //维度的数量，几维度
+        UidBaseType getFuid() const { return fuid; } //唯一标识
 
         void setData(
             std::function<void(void *, size_t, DataType)> const &generator) const;
@@ -69,11 +70,11 @@ namespace infini
             return data->getPtr<T>();
         }
 
-        DataType getDType() const { return dtype; }
-        Runtime getRuntime() const { return runtime; }
+        DataType getDType() const { return dtype; } //获取数据类型
+        Runtime getRuntime() const { return runtime; } //获取运行时
 
-        OpVec getTargets() const { return wrefs_to_refs(targets); }
-        Operator getSource() const { return source.lock(); }
+        OpVec getTargets() const { return wrefs_to_refs(targets); } //获取使用这个张量的算子列表
+        Operator getSource() const { return source.lock(); } //获取产生这个张量的算子
 
     private:
         template <class T>
@@ -127,7 +128,7 @@ namespace infini
                     if (std::min(fabs(a[i]), fabs(b[i])) == 0. &&
                         fabs(a[i] - b[i]) > relativeError)
                     {
-                        printf("Error on %lu: %f %f\n", i, a[i], b[i]);
+                        printf("Error on %zu: %f %f\n", i, a[i], b[i]);
                         return false;
                     }
                     else if (std::min(fabs(a[i]), fabs(b[i])) != 0. &&
@@ -135,7 +136,7 @@ namespace infini
                                      std::max(fabs(a[i]), fabs(b[i])) >
                                  relativeError)
                     {
-                        printf("Error on %lu: %f %f\n", i, a[i], b[i]);
+                        printf("Error on %zu: %f %f\n", i, a[i], b[i]);
                         return false;
                     }
                 }
@@ -147,9 +148,9 @@ namespace infini
             return true;
         }
 
-        void addTarget(const Operator &op) { targets.emplace_back(op); }
-        void setSource(const Operator &op) { source = op; }
-        void removeTarget(const Operator &op)
+        void addTarget(const Operator &op) { targets.emplace_back(op); } //添加使用这个张量的算子
+        void setSource(const Operator &op) { source = op; } //设置产生这个张量的算子
+        void removeTarget(const Operator &op) //删除使用这个张量的算子
         {
             for (auto itr = targets.begin(); itr != targets.end();)
             {

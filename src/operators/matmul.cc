@@ -1,4 +1,5 @@
 #include "operators/matmul.h"
+#include "utils/operator_utils.h"
 
 namespace infini
 {
@@ -29,16 +30,37 @@ namespace infini
         // =================================== 作业 ===================================
         auto shape_A = inputs[0]->getDims();
         auto shape_B = inputs[1]->getDims();
-        auto shape_C = shape_A;
-        bool transA = getTransA();
-        bool transB = getTransB();
-        for(size_t i = 0; i < shape_A.size() - 2; i++)
-        {
-            shape_C[i] = std::max(shape_A[i], shape_B[i]);
+        
+        int rankA = shape_A.size();
+        int rankB = shape_B.size();
+        
+        // 获取 A 和 B 的最后两维（矩阵维度）
+        int m = transA ? shape_A[rankA - 1] : shape_A[rankA - 2];
+        int kA = transA ? shape_A[rankA - 2] : shape_A[rankA - 1];
+        int kB = transB ? shape_B[rankB - 1] : shape_B[rankB - 2];
+        int n = transB ? shape_B[rankB - 2] : shape_B[rankB - 1];
+        
+        // 获取 batch 维度
+        Shape batchA(shape_A.begin(), shape_A.end() - 2);
+        Shape batchB(shape_B.begin(), shape_B.end() - 2);
+        
+        // 对 batch 维度进行广播
+        Shape batchC;
+        if (batchA.empty() && batchB.empty()) {
+            // 都是 2D 矩阵，无 batch
+        } else if (batchA.empty()) {
+            batchC = batchB;
+        } else if (batchB.empty()) {
+            batchC = batchA;
+        } else {
+            batchC = infer_broadcast(batchA, batchB);
         }
-
-        shape_C[shape_A.size() - 2] = transA ? shape_A[shape_A.size() - 1] : shape_A[shape_A.size() - 2];
-        shape_C[shape_A.size() - 1] = transB ? shape_B[shape_B.size() - 2] : shape_B[shape_B.size() - 1];
+        
+        // 构建输出 shape
+        Shape shape_C = batchC;
+        shape_C.push_back(m);
+        shape_C.push_back(n);
+        
         return {{shape_C}};
     }
 

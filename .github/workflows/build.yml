@@ -22,4 +22,6 @@ jobs:
       run: make
 
     - name: Test cpu
-      run: make test-cpp
+      run: |
+        cd build/Release
+        ctest --output-on-failure
